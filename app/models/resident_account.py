@@ -1,5 +1,5 @@
 from app.models.user_account import UserAccount
-class AdminAccount(UserAccount):
+class ResidentAccount(UserAccount):
 
     def __init__(self, username, password, permissions, id):
 
@@ -9,4 +9,4 @@ class AdminAccount(UserAccount):
             self.permissions= ['user']
 
     def isAdmin(self):
-        return True
+        return False
