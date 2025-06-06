@@ -10,7 +10,7 @@ class Application:
         self.pages = {
             'portal': self.portal,
             'pagina': self.pagina,
-            'create': self.create,
+            'cadastro': self.cadastro,
             'delete': self.delete,
             'chat': self.chat,
             'edit': self.edit
@@ -75,9 +75,9 @@ class Application:
             self.update_user(username, password)
             return self.render('edit')
 
-        @self.app.route('/create', method='GET')
+        @self.app.route('/cadastro', method='GET')
         def create_getter():
-            return self.render('create')
+            return self.render('cadastro')
 
         @self.app.route('/create', method='POST')
         def create_action():
@@ -116,8 +116,8 @@ class Application:
         session_id = request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
 
-    def create(self):
-        return template('app/views/html/create')
+    def cadastro(self):
+        return template('app/views/html/cadastro')
 
     def delete(self):
         current_user = self.getCurrentUserBySessionId()
