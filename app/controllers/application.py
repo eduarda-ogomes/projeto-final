@@ -8,7 +8,7 @@ class Application:
     def __init__(self):
 
         self.pages = {
-            'portal': self.portal,
+            'login': self.login,
             'pagina': self.pagina,
             'cadastro': self.cadastro,
             'delete': self.delete,
@@ -53,9 +53,9 @@ class Application:
             return self.render('chat')
 
         @self.app.route('/')
-        @self.app.route('/portal', method='GET')
+        @self.app.route('/login', method='GET')
         def portal_getter():
-            return self.render('portal')
+            return self.render('login')
 
         @self.app.route('/edit', method='GET')
         def edit_getter():
@@ -98,12 +98,12 @@ class Application:
         @self.app.route('/delete', method='POST')
         def delete_action():
             self.delete_user()
-            return self.render('portal')
+            return self.render('login')
 
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
-        content = self.pages.get(page, self.portal)
+        content = self.pages.get(page, self.login)
         if not parameter:
             return content()
         return content(parameter)
@@ -129,22 +129,22 @@ class Application:
         user_accounts= self.__users.getUserAccounts()
         return template('app/views/html/edit', user=current_user, accounts= user_accounts)
 
-    def portal(self):
+    def login(self):
         current_user = self.getCurrentUserBySessionId()
         if current_user:
-            portal_render = template('app/views/html/portal', \
+            login_render = template('app/views/html/login', \
             username=current_user.username, edited=self.edited, \
             removed=self.removed, created=self.created)
             self.edited = None
             self.removed= None
             self.created= None
-            return portal_render
-        portal_render = template('app/views/html/portal', username=None, \
+            return login_render
+        login_render = template('app/views/html/login', username=None, \
         edited=self.edited, removed=self.removed, created=self.created)
         self.edited = None
         self.removed= None
         self.created= None
-        return portal_render
+        return login_render
 
     def pagina(self):
         self.update_users_list()
@@ -165,7 +165,7 @@ class Application:
             self.logout_user()
             response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
             redirect('/pagina')
-        redirect('/portal')
+        redirect('/login')
 
     def delete_user(self):
         current_user = self.getCurrentUserBySessionId()
@@ -173,16 +173,16 @@ class Application:
         self.removed= self.__users.removeUser(current_user)
         self.update_account_list()
         print(f'Valor de retorno de self.removed: {self.removed}')
-        redirect('/portal')
+        redirect('/login')
 
     def insert_user(self, username, password):
         self.created= self.__users.book(username, password,[])
         self.update_account_list()
-        redirect('/portal')
+        redirect('/login')
 
     def update_user(self, username, password):
         self.edited = self.__users.setUser(username, password)
-        redirect('/portal')
+        redirect('/login')
 
     def logout_user(self):
         session_id = request.get_cookie('session_id')
@@ -197,7 +197,7 @@ class Application:
             auth_users= self.__users.getAuthenticatedUsers().values()
             return template('app/views/html/chat', current_user=current_user, \
             messages=messages, auth_users=auth_users)
-        redirect('/portal')
+        redirect('/login')
 
     def newMessage(self, message):
         try:
