@@ -49,10 +49,10 @@ class UserRecord():
     """Banco de dados JSON para o recurso: Usuário"""
 
     def __init__(self):
-        self.__allusers= {'user_accounts': [], 'super_accounts': []}
+        self.__allusers= {'resident_accounts': [], 'admin_accounts': [],}
         self.__authenticated_users = {}
-        self.read('user_accounts')
-        self.read('super_accounts')
+        self.read('resident_accounts')
+        self.read('admin_accounts')
 
 
     def read(self,database):
@@ -138,3 +138,35 @@ class UserRecord():
     def logout(self, session_id):
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id] # Remove o usuário logado
+# ------------------------------------------------------------------------------
+
+
+
+class HouseRecord:
+
+    def __init__(self, chores):
+        self.__allhouses= {'houses': []}
+        self.__authenticated_users = {}
+        self.read('houses')
+
+
+    def read(self,database):
+      house_class = houses
+        try:
+            with open(f"app/controllers/db/{database}.json", "r") as fjson:
+                user_d = json.load(fjson)
+                self.__allusers[database]= [account_class(**data) for data in user_d]
+        except FileNotFoundError:
+            self.__allusers[database].append(account_class('Guest', '000000'))
+
+
+    def __write(self,database):
+        try:
+            with open(f"app/controllers/db/{database}.json", "w") as fjson:
+                user_data = [vars(user_account) for user_account in \
+                self.__allusers[database]]
+                json.dump(user_data, fjson)
+                print(f'Arquivo gravado com sucesso (Usuário)!')
+        except FileNotFoundError:
+            print('O sistema não conseguiu gravar o arquivo (Usuário)!')
+

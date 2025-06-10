@@ -1,7 +1,7 @@
 from app.models.user_account import UserAccount
 class AdminAccount(UserAccount):
 
-    def __init__(self, username, password, permissions, id):
+    def __init__(self, username, password, permissions, birthday, id):
 
         super().__init__(username, password, id)
         self.permissions= permissions

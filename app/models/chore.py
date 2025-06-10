@@ -5,3 +5,6 @@ class Chore():
         self.date= date
         self.status= status
         self.responsable= responsable.username
+        
+
+    
