@@ -1,11 +1,12 @@
-from app.models.user_account import UserAccount, SuperAccount
+from app.models.user_account import UserAccount
 from app.models.user_message import UserMessage
+
+from app.models.house import House
 import json
 import uuid
 
 
 class MessageRecord():
-    """Banco de dados JSON para o recurso: Mensagem"""
 
     def __init__(self):
         self.__user_messages= []
@@ -46,127 +47,117 @@ class MessageRecord():
 # ------------------------------------------------------------------------------
 
 class UserRecord():
-    """Banco de dados JSON para o recurso: Usuário"""
 
-    def __init__(self):
-        self.__allusers= {'resident_accounts': [], 'admin_accounts': [],}
+    def __init__(self, database):
+        self.database = database
+        self.__allusers= []
         self.__authenticated_users = {}
-        self.read('resident_accounts')
-        self.read('admin_accounts')
-
+        self.read(database)
+        
 
     def read(self,database):
-        account_class = SuperAccount if (database == 'super_accounts' ) else UserAccount
         try:
             with open(f"app/controllers/db/{database}.json", "r") as fjson:
-                user_d = json.load(fjson)
-                self.__allusers[database]= [account_class(**data) for data in user_d]
+                self.__allusers = json.load(fjson)
         except FileNotFoundError:
-            self.__allusers[database].append(account_class('Guest', '000000'))
+            self.__allusers = []
 
 
     def __write(self,database):
         try:
             with open(f"app/controllers/db/{database}.json", "w") as fjson:
-                user_data = [vars(user_account) for user_account in \
-                self.__allusers[database]]
-                json.dump(user_data, fjson)
-                print(f'Arquivo gravado com sucesso (Usuário)!')
+                json.dump(self.__allusers, fjson)
+                print("Salvo com sucesso")
         except FileNotFoundError:
             print('O sistema não conseguiu gravar o arquivo (Usuário)!')
 
 
 
     def setUser(self,username,password):
-        for account_type in ['user_accounts', 'super_accounts']:
-            for user in self.__allusers[account_type]:
-                if username == user.username:
-                    user.password= password
-                    print(f'O usuário {username} foi editado com sucesso.')
-                    self.__write(account_type)
-                    return username
+        for user in self.__allusers:
+            if username == user.username:
+                user.password= password
+                print(f'O usuário {username} foi editado com sucesso.')
+                self.__write() #### oque colocar aqui dentro, antes era account_type
+                return username
         print('O método setUser foi chamado, porém sem sucesso.')
         return None
 
 
     def removeUser(self, user):
-        for account_type in ['user_accounts', 'super_accounts']:
-            if user in self.__allusers[account_type]:
-                print(f'O usuário {"(super) " if account_type == "super_accounts" else ""}{user.username} foi encontrado no cadastro.')
-                self.__allusers[account_type].remove(user)
-                print(f'O usuário {"(super) " if account_type == "super_accounts" else ""}{user.username} foi removido do cadastro.')
-                self.__write(account_type)
-                return user.username
+        if user in self.__allusers:
+            print(f'O usuário {user.username} foi encontrado no cadastro.')
+            self.__allusers.remove(user)
+            print(f'O usuário {user.username} foi removido do cadastro.')
+            self.__write() ### oque coloca dentro
+            return user.username
         print(f'O usuário {user.username} não foi identificado!')
         return None
 
 
-    def book(self, username, password, permissions):
-        account_type = 'super_accounts' if permissions else 'user_accounts'
-        account_class = SuperAccount if permissions else UserAccount
-        new_user = account_class(username, password, permissions) if permissions else account_class(username, password)
-        self.__allusers[account_type].append(new_user)
-        self.__write(account_type)
-        return new_user.username
+    def add_user(self, account):
+        self.__allusers.append(vars[account])
+        
 
 
-    def getUserAccounts(self):
-        return self.__allusers['user_accounts']
+  #  def getResidentAccounts(self):
+  #      return self.__allusers['resident_accounts']
 
 
-    def getCurrentUser(self,session_id):
-        if session_id in self.__authenticated_users:
-            return self.__authenticated_users[session_id]
-        else:
-            return None
+  #  def getCurrentUser(self,session_id):
+   #     if session_id in self.__authenticated_users:
+   #         return self.__authenticated_users[session_id]
+   #     else:
+   #         return None
 
 
     def getAuthenticatedUsers(self):
         return self.__authenticated_users
 
 
-    def checkUser(self, username, password):
-        for account_type in ['user_accounts', 'super_accounts']:
-            for user in self.__allusers[account_type]:
-                if user.username == username and user.password == password:
-                    session_id = str(uuid.uuid4())  # Gera um ID de sessão único
-                    self.__authenticated_users[session_id] = user
-                    return session_id  # Retorna o ID de sessão para o usuário
+    def checkUser(self, username, password): #como vai funcionar o self authenticated_users
+        for user in self.__allusers:
+            if user.username == username and user.password == password:
+                session_id = str(uuid.uuid4())  
+                self.__authenticated_users[session_id] = user
+                return session_id  
         return None
 
 
     def logout(self, session_id):
         if session_id in self.__authenticated_users:
-            del self.__authenticated_users[session_id] # Remove o usuário logado
+            del self.__authenticated_users[session_id] 
 # ------------------------------------------------------------------------------
 
 
 
 class HouseRecord:
 
-    def __init__(self, chores):
-        self.__allhouses= {'houses': []}
-        self.__authenticated_users = {}
-        self.read('houses')
+    def __init__(self, database):
+        self.database = database
+        self.__allhouses= []
+        self.read(database)
 
 
     def read(self,database):
-      house_class = houses
         try:
             with open(f"app/controllers/db/{database}.json", "r") as fjson:
-                user_d = json.load(fjson)
-                self.__allusers[database]= [account_class(**data) for data in user_d]
+                self.__allhouses = json.load(fjson)
         except FileNotFoundError:
-            self.__allusers[database].append(account_class('Guest', '000000'))
+            self.__allhouses = []
 
 
     def __write(self,database):
         try:
             with open(f"app/controllers/db/{database}.json", "w") as fjson:
-                user_data = [vars(user_account) for user_account in \
-                self.__allusers[database]]
-                json.dump(user_data, fjson)
-                print(f'Arquivo gravado com sucesso (Usuário)!')
+                json.dump(self.__allhouses, fjson)
+                print("salvo com sucesso")
         except FileNotFoundError:
-            print('O sistema não conseguiu gravar o arquivo (Usuário)!')
+            print('O sistema não conseguiu gravar o arquivo (House)!')
+
+    def add_house(self, house):
+        self.__allhouses.append(vars[house])
+
+        
+
 
