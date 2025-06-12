@@ -85,6 +85,18 @@ class Application:
             password = request.forms.get('password')
             self.insert_user(username, password)
             return self.render('portal')
+        
+        @self.app.route('/cadastro', method='POST')
+        def create_action():
+            fullname = request.forms.get('fullname')
+            username = request.forms.get('username')
+            birthdate = request.forms.get('birthdate')
+            email = request.forms.get('email')
+            password = request.forms.get('password')
+            confirm_password = request.forms.get('confirm_password')
+            gender = request.forms.get('gender')
+            self.insert_user(fullname,username,birthdate, email, password, confirm_password, gender)
+            return self.render('login')
 
         @self.app.route('/logout', method='POST')
         def logout_action():
@@ -175,8 +187,8 @@ class Application:
         print(f'Valor de retorno de self.removed: {self.removed}')
         redirect('/login')
 
-    def insert_user(self, username, password):
-        self.created= self.__users.book(username, password,[])
+    def insert_user(self, fullname,username,birthdate, email, password, confirm_password, gender):
+        self.created= self.__users.book(fullname,username,birthdate, email, password, confirm_password, gender,[])
         self.update_account_list()
         redirect('/login')
 
